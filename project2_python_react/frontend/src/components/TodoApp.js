@@ -5,8 +5,10 @@ function TodoApp() {
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [newTodoDescription, setNewTodoDescription] = useState('');
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const fetchTodos = () => {
-    fetch('http://127.0.0.1:8000/api/todos/')
+    fetch(`${apiUrl}/api/todos/`)
       .then(response => response.json())
       .then(data => setTodos(data))
       .catch(error => console.error('Error fetching todos:', error));
@@ -20,7 +22,7 @@ function TodoApp() {
     e.preventDefault();
     if (!newTodoTitle.trim()) return;
 
-    fetch('http://127.00.1:8000/api/todos/', {
+    fetch(`${apiUrl}/api/todos/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

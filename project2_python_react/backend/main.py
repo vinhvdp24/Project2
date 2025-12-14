@@ -7,8 +7,21 @@ import os
 from database import Base, engine, get_db
 from models import Todo as DBTodo # Alias to avoid name conflict
 
+from sqlalchemy.exc import OperationalError
+import time
+
 def create_db_and_tables():
-    Base.metadata.create_all(bind=engine)
+    # Thử kết nối trong một khoảng thời gian nhất định (ví dụ: 30 giây)
+    for _ in range(10): # Thử 10 lần
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("Database connection successful, tables created.")
+            return
+        except OperationalError:
+            print("Database connection failed, retrying in 3 seconds...")
+            time.sleep(3)
+    print("Could not connect to the database after multiple attempts.")
+
 
 app = FastAPI()
 
