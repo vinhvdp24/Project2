@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak
+venv.bak
+
+# Node
+node_modules/
+npm-debug.log
+.npm
+
+# Database
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
