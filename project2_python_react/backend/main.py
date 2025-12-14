@@ -2,18 +2,27 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+import os
 
 from database import Base, engine, get_db
 from models import Todo as DBTodo # Alias to avoid name conflict
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+def create_db_and_tables():
+    Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Cấu hình CORS (giữ nguyên)
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+# Cấu hình CORS
+# Lấy URL của Netlify từ biến môi trường để bảo mật hơn
+NETLIFY_URL = os.getenv("NETLIFY_URL", "http://localhost:3000")
+
 origins = [
-    "http://localhost:3000", # Cho phép React app
+    "http://localhost:3000",
+    NETLIFY_URL
 ]
 
 app.add_middleware(
@@ -24,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic models for request/response
+# Pydantic models cho request/response
 class TodoBase(BaseModel):
     title: str
     description: str | None = None
@@ -37,14 +46,13 @@ class Todo(TodoBase):
     completed: bool
 
     class Config:
-        orm_mode = True # Enable ORM mode for SQLAlchemy models
+        orm_mode = True
 
-# Original message endpoint (optional, keeping for now)
+# API endpoints
 @app.get("/api/message")
 def get_message():
     return {"message": "Hello from FastAPI!"}
 
-# API to create a new todo item
 @app.post("/api/todos/", response_model=Todo, status_code=status.HTTP_201_CREATED)
 def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
     db_todo = DBTodo(title=todo.title, description=todo.description)
@@ -53,7 +61,6 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
     db.refresh(db_todo)
     return db_todo
 
-# API to get all todo items
 @app.get("/api/todos/", response_model=list[Todo])
 def read_todos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     todos = db.query(DBTodo).offset(skip).limit(limit).all()
