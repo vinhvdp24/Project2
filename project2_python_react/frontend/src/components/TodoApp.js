@@ -7,16 +7,16 @@ function TodoApp() {
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  const fetchTodos = () => {
-    fetch(`${apiUrl}/api/todos/`)
-      .then(response => response.json())
-      .then(data => setTodos(data))
-      .catch(error => console.error('Error fetching todos:', error));
-  };
-
   useEffect(() => {
+    const fetchTodos = () => {
+      fetch(`${apiUrl}/api/todos/`)
+        .then(response => response.json())
+        .then(data => setTodos(data))
+        .catch(error => console.error('Error fetching todos:', error));
+    };
+
     fetchTodos();
-  }, []);
+  }, [apiUrl]);
 
   const handleAddTodo = (e) => {
     e.preventDefault();
